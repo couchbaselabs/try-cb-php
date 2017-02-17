@@ -16,34 +16,11 @@ use App\User;
 |
 */
 
-Route::post('/user/signup', function (Request $request) {
-    $credentials = [
-        'name' => $request->user,
-        'password' => $request->password,
-    ];
-    try {
-        $user = User::create($credentials);
-    } catch (Exception $e) {
-        return Response::json(['failure' => 'There was an error creating account.'], HttpResponse::HTTP_CONFLICT);
-    }
 
-    $token = JWTAuth::fromUser($user);
+Route::post('/user/signup', 'UserController@create')->middleware('api');
 
-    return Response::json(['data' => compact('token')], HttpResponse::HTTP_ACCEPTED);
-})->middleware('api');
+Route::post('/user/login', 'UserController@login')->middleware('api');
 
-Route::post('/user/login', function (Request $request) {
-    $credentials = [
-        'name' => $request->user,
-        'password' => $request->password,
-    ];
-    try {
-        $user = User::where($credentials)->firstOrFail();
-    } catch (Exception $e) {
-        return Response::json(['failure' => 'Bad Username or Password'], HttpResponse::HTTP_CONFLICT);
-    }
+Route::get('/airports', 'AirportController@search')->middleware('api');
 
-    $token = JWTAuth::fromUser($user, ['user' => $user->]);
-
-    return Response::json(['data' => compact('token')], HttpResponse::HTTP_ACCEPTED);
-})->middleware('api');
+Route::get('/flightPaths/{from}/{to}', 'FlightPathsController@find')->middleware('api');

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "6c4cde498f8515489de2b0e73ca9e88e",
+    "content-hash": "3957fa194cc758ff9781870e03fb1964",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -2079,6 +2079,71 @@
                 "environment"
             ],
             "time": "2016-09-01T10:05:43+00:00"
+        },
+        {
+            "name": "ytake/laravel-couchbase",
+            "version": "0.6.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/ytake/Laravel-Couchbase.git",
+                "reference": "fed6dc02811f81b188edf6933f1a457f065e1116"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/ytake/Laravel-Couchbase/zipball/fed6dc02811f81b188edf6933f1a457f065e1116",
+                "reference": "fed6dc02811f81b188edf6933f1a457f065e1116",
+                "shasum": ""
+            },
+            "require": {
+                "ext-couchbase": ">=2.2.0",
+                "illuminate/cache": "^5.3",
+                "illuminate/config": "^5.3",
+                "illuminate/console": "^5.3",
+                "illuminate/database": "^5.3",
+                "illuminate/encryption": "^5.3",
+                "illuminate/events": "^5.3",
+                "illuminate/queue": "^5.3",
+                "illuminate/session": "^5.3",
+                "illuminate/support": "^5.3",
+                "php": ">=5.6.4"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "~1.0",
+                "phing/phing": "~2.0",
+                "phpunit/phpunit": "~5.0",
+                "satooshi/php-coveralls": "*",
+                "symfony/console": "~2.0|~3.0",
+                "symfony/framework-bundle": "~2.0|~3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Ytake\\LaravelCouchbase\\": "src"
+                },
+                "files": [
+                    "src/transfer.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Yuuki Takezawa",
+                    "email": "yuuki.takezawa@comnect.jp.net"
+                }
+            ],
+            "description": "Couchbase providers for Laravel",
+            "keywords": [
+                "cache",
+                "couchbase",
+                "database",
+                "laravel",
+                "queue",
+                "session"
+            ],
+            "time": "2016-12-08T05:50:38+00:00"
         }
     ],
     "packages-dev": [
