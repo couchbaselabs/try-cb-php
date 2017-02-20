@@ -19,8 +19,18 @@ use App\User;
 
 Route::post('/user/signup', 'UserController@create')->middleware('api');
 
-Route::post('/user/login', 'UserController@login')->middleware('api');
+Route::post('/user/login', 'UserController@authenticate')->middleware('api');
+
+Route::post('/user/{user_name}/flights', 'UserController@book')->middleware('api');
+
+Route::get('/user/{user_name}/flights', 'UserController@booked')->middleware('api');
 
 Route::get('/airports', 'AirportController@search')->middleware('api');
 
 Route::get('/flightPaths/{from}/{to}', 'FlightPathsController@find')->middleware('api');
+
+Route::get('/hotel/', 'HotelController@find')->middleware('api');
+
+Route::get('/hotel/{description}', 'HotelController@find_by_description')->middleware('api');
+
+Route::get('/hotel/{description}/{location}', 'HotelController@find_by_description_location')->middleware('api');

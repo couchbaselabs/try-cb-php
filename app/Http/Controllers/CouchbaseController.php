@@ -15,6 +15,6 @@ class CouchbaseController extends Controller
      */
     public function __construct()
     {
-        $this->db = DB::connection('couchbase')->openBucket('default');
+        $this->db = DB::connection('couchbase')->openBucket('travel-sample');
     }
 }

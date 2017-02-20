@@ -11,6 +11,7 @@ class AirportController extends CouchbaseController
     {
         $searchStr = $request->__get("search");
 
+
         if (strlen($searchStr) == 3) {
             $param = '$faa';
             $query = \CouchbaseN1qlQuery::fromString("SELECT airportname FROM `travel-sample` WHERE faa like ".$param." limit 5");
@@ -20,10 +21,12 @@ class AirportController extends CouchbaseController
             $param = '$icao';
             $query = \CouchbaseN1qlQuery::fromString("SELECT airportname FROM `travel-sample` WHERE icao like ".$param." limit 5");
             $query->namedParams(array('icao' => $searchStr));
-        } else {
+        } else if (strlen($searchStr) > 0) {
             $param = '$airportName';
             $query = \CouchbaseN1qlQuery::fromString("SELECT airportname FROM `travel-sample` WHERE airportname like ". $param ." limit 5");
             $query->namedParams(array('airportname' => $searchStr.'%'));
+        } else {
+            $query = \CouchbaseN1qlQuery::fromString("SELECT airportname FROM `travel-sample` limit 5");
         }
 
         $result = $this->db->query($query);
