@@ -46,6 +46,14 @@ return [
 
     'connections' => [
 
+
+        'couchbase' => [
+            'driver'        => 'couchbase',
+            'host'          => 'couchbase://' . env('COUCHBASE_SERVER', '127.0.0.1'),
+            'user'          => env('COUCHBASE_USER', 'Administrator'),
+            'password'      => env('COUCHBASE_PASS', 'password'),
+        ],
+
         'sqlite' => [
             'driver' => 'sqlite',
             'database' => env('DB_DATABASE', database_path('database.sqlite')),
