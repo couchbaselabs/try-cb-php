@@ -31,6 +31,6 @@ Route::get('/flightPaths/{from}/{to}', 'FlightPathsController@find')->middleware
 
 Route::get('/hotel/', 'HotelController@find')->middleware('api');
 
-Route::get('/hotel/{description}', 'HotelController@find_by_description')->middleware('api');
+Route::get('/hotel/{description}', 'HotelController@findByDescription')->middleware('api');
 
-Route::get('/hotel/{description}/{location}', 'HotelController@find_by_description_location')->middleware('api');
+Route::get('/hotel/{description}/{location}', 'HotelController@findByDescriptionLocation')->middleware('api');

@@ -179,7 +179,7 @@ return [
         App\Providers\RouteServiceProvider::class,
 
         Tymon\JWTAuth\Providers\JWTAuthServiceProvider::class,
-        \Ytake\LaravelCouchbase\CouchbaseServiceProvider::class,
+        \Ytake\LaravelCouchbase\CouchbaseServiceProvider::class
     ],
 
     /*
