@@ -27,7 +27,7 @@ class HotelController extends CouchbaseController
      * Performs full-text search for given criteria.
      *
      * If neither of criteria specified (or set to "*"), this function lists all hotels in the search index.
-     * Note that in any case number of the results limited to 100 entries.
+     * Note that in any case the number of results is limited to 100 entries.
      *
      * @param string $description text to match in 'description' and 'name' fields of the hotel
      * @param string $location text to match in 'country', 'city', 'state' and 'address' fields of the hotel
