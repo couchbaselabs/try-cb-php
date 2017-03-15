@@ -10,14 +10,16 @@ http://sdkbuilds.sc.couchbase.com/view/PHP/job/php-sdk-package/lastSuccessfulBui
 
 Instructions for Unix-like OSes (for Windows, just use pre-built binaries):
 
-    wget http://sdkbuilds.sc.couchbase.com/view/PHP/job/php-sdk-package/lastSuccessfulBuild/artifact/packages/couchbase-2.3.1snapshot.tgz
-    sudo pecl install couchbase-2.3.1snapshot.tgz
+    shell> wget http://sdkbuilds.sc.couchbase.com/view/PHP/job/php-sdk-package/lastSuccessfulBuild/artifact/packages/couchbase-2.3.1snapshot.tgz
+    shell> sudo pecl install couchbase-2.3.1snapshot.tgz
 
 ## Setting Up Prerequisites
 
 Default sample configuration assumes that `travel-sample` bucket created on the Couchbase Server at
-http://localhost:8091. Also the cluster should have Full Text Search capability, and FTS index named `travel-search`
+http://localhost:8091. Also the cluster should have Full Text Search capability, and FTS index named `hotels`
 bound to this sample bucket.
+
+See the main documentation at http://developer.couchbase.com in the developer section for more information.
 
 ## Running the Application
 
