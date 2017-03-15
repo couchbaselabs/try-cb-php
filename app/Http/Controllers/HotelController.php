@@ -53,7 +53,7 @@ class HotelController extends CouchbaseController
             ));
         }
 
-        $query = new SearchQuery("travel-search", $queryBody);
+        $query = new SearchQuery("hotels", $queryBody);
         $query->limit(100);
         $result = $this->db->query($query);
 
