@@ -2093,7 +2093,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/avsej/laravel-couchbase",
-                "reference": "89a7bc04355cfdd4700dfb2f9b6620cf911824eb"
+                "reference": "127418d1d5db27765673f7a032ccb07342a01559"
             },
             "require": {
                 "ext-couchbase": ">=2.2.0",

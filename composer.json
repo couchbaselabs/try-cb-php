@@ -8,7 +8,7 @@
         "php": ">=5.6.4",
         "laravel/framework": "5.3.*",
         "tymon/jwt-auth": "0.5.*",
-        "ytake/laravel-couchbase": "dev-laravel-5.3-couchbase-2.3",
+        "ytake/laravel-couchbase": "dev-laravel-5.3-couchbase-2.3-server-5.0",
 	"ext-couchbase": ">=2.3.1"
     },
     "require-dev": {
