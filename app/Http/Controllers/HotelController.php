@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use  \CouchbaseSearchQuery as SearchQuery;
+use  \Couchbase\SearchQuery as SearchQuery;
 
 
 class HotelController extends CouchbaseController
@@ -35,47 +35,54 @@ class HotelController extends CouchbaseController
      * @return array list of the arrays, with 'address', 'name' and 'description' fields filled in
      */
     protected function findHotels($description = "", $location = "") {
-        $queryBody = SearchQuery::conjuncts(SearchQuery::term("hotel")->field("type"));
+
+        $queryBody = [SearchQuery::term("hotel")->field("type"),];
 
         if (!empty($location) && $location != "*") {
-            $queryBody->every(SearchQuery::disjuncts(
+            $qLoc = SearchQuery::disjuncts(
                 SearchQuery::match($location)->field("country"),
                 SearchQuery::match($location)->field("city"),
                 SearchQuery::match($location)->field("state"),
                 SearchQuery::match($location)->field("address")
-            ));
+            );
+            array_push($queryBody, $qLoc);
         }
 
         if (!empty($description) && $description != "*") {
-            $queryBody->every(SearchQuery::disjuncts(
+            $qDesc = SearchQuery::disjuncts(
                 SearchQuery::match($description)->field("description"),
                 SearchQuery::match($description)->field("name")
-            ));
+            );
+            array_push($queryBody, $qDesc);
         }
 
-        $query = new SearchQuery("hotels", $queryBody);
+        $query = new SearchQuery('hotels',SearchQuery::conjuncts(...$queryBody));
         $query->limit(100);
-        $result = $this->db->query($query);
+
+        // This causes a seg-fault if the index doesn't exist. TODO: Check exists first
+        $result = $this->db->searchQuery('hotels',$query);
 
         $response = array();
-        foreach($result->hits as $hit) {
-            $info = $this->db->lookupIn($hit->id)
-                ->get("country")
-                ->get("city")
-                ->get("state")
-                ->get("address")
-                ->get("name")
-                ->get("description")
-                ->execute();
+        foreach($result->hits() as $hit) {
+            // var_dump($hit);
+            $result = $this->collection->lookupIn($hit["id"], [
+                new \Couchbase\LookupGetSpec("country"),
+                new \Couchbase\LookupGetSpec("city"),
+                new \Couchbase\LookupGetSpec("state"),
+                new \Couchbase\LookupGetSpec("address"),
+                new \Couchbase\LookupGetSpec("name"),
+                new \Couchbase\LookupGetSpec("description")
+            ]);
+
             $response[] = [
                 "address" => join(',', [
-                    $info->value[3]["value"],
-                    $info->value[2]["value"],
-                    $info->value[1]["value"],
-                    $info->value[0]["value"]
+                    $result->content(3),
+                    $result->content(2),
+                    $result->content(1),
+                    $result->content(0),
                 ]),
-                "name" => $info->value[4]["value"],
-                "description" => $info->value[5]["value"]
+                "name" => $result->content(4),
+                "description" => $result->content(5),
             ];
         }
 

@@ -33,13 +33,15 @@ class UserController extends CouchbaseController
         ];
         $user = new User($credentials);
 
-        $userInfo = $this->db->get("user::".$user->name);
-
-        if ($userInfo == null) {
+        try {
+            $userInfo = $this->collection->get("user::".$user->name);
+        } catch (Couchbase\KeyNotFoundException $e) {
             throw new AuthenticationException("User not found");
         }
+        
+        $userInfo = json_decode($userInfo->content());
 
-        if (strcmp($user->password, $userInfo->value->password) != 0) {
+        if (strcmp($user->password, $userInfo->password) != 0) {
             throw new AuthenticationException("Invalid password");
         }
 
@@ -57,14 +59,12 @@ class UserController extends CouchbaseController
     {
         $key = "user::" . $userName;
         try {
-            $userInfo = $this->db->get($key)->value;
-        } catch(\CouchbaseException $e) {
-            throw new AuthenticationException("Invalid user ".$e);
-        }
-
-        if ($userInfo == null) {
+            $userInfo = $this->collection->get($key);
+        } catch (Couchbase\KeyNotFoundException $e) {
             throw new AuthenticationException("User not found");
         }
+        
+        $userInfo = json_decode($userInfo->content());
 
         $credentials = [
             'name' => $userName,
@@ -88,7 +88,7 @@ class UserController extends CouchbaseController
             $userInfo->flights[] = $flight;
             $added[] = $flight;
         }
-        $this->db->upsert($key, $userInfo);
+        $this->collection->upsert($key, $userInfo);
         return response()->json([
             "data" => ["added" => $added],
             'context' => "Booked flight in Couchbase document $key"
@@ -97,7 +97,8 @@ class UserController extends CouchbaseController
 
     public function booked(Request $request, $userName)
     {
-        $userInfo = $this->db->get("user::" . $userName)->value;
+        $userInfo = $this->collection->get("user::" . $userName);
+        $userInfo = json_decode($userInfo->content());
         $flights = [];
         if (property_exists($userInfo, "flights")) {
             $flights = $userInfo->flights;

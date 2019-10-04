@@ -9,7 +9,7 @@
         "laravel/framework": "5.5.*",
         "tymon/jwt-auth": "0.5.*",
         "ytake/laravel-couchbase": "1.0.1",
-        "ext-couchbase": ">=2.6.1"
+        "ext-couchbase": "3.0.0alpha4"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",

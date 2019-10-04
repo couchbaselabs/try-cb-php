@@ -15,15 +15,14 @@ class CouchbaseController extends Controller
      */
     public function __construct()
     {
-        // Establish username and password for bucket-access
-        $authenticator = new \Couchbase\PasswordAuthenticator();
-        $authenticator->username('Administrator')->password('password');
+        $connectionString = "couchbase://localhost";
+        $cluster = new \Couchbase\Cluster($connectionString);
+        $cluster->authenticateAs("Administrator", "password");
+        $bucket = $cluster->bucket("travel-sample");
+        $collection = $bucket->defaultCollection();
 
-        // Connect to Couchbase Server
-        $cluster = new \CouchbaseCluster("couchbase://127.0.0.1");
-        // Authenticate, then open bucket
-        $cluster->authenticate($authenticator);
-
-        $this->db = $cluster->openBucket('travel-sample');
+        $this->bucket = $bucket;
+        $this->collection = $collection;
+        $this->db = $cluster;
     }
 }
