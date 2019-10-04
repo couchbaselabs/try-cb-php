@@ -18,7 +18,7 @@ class UserController extends CouchbaseController
         ];
         $user = new User($credentials);
         try {
-            $this->db->insert("user::".$request->user, $user);
+            $this->collection->insert("user::".$request->user, $user);
             return response()->json(["data" => ["token" => $this->buildToken($user)]]);
         } catch (\Couchbase\Exception $ex) {
             return response()->json(["failure" => 'Failed to create user'], 409);
