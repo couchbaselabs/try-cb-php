@@ -18,11 +18,17 @@ class CouchbaseController extends Controller
         $connectionString = "couchbase://localhost";
         $cluster = new \Couchbase\Cluster($connectionString);
         $cluster->authenticateAs("Administrator", "password");
-        $bucket = $cluster->bucket("travel-sample");
-        $collection = $bucket->defaultCollection();
+        $dataBucket = $cluster->bucket("travel-sample");
+        $userBucket = $cluster->bucket("travel-users");
+        $mainColl = $dataBucket->defaultCollection();
+        $userScope = $userBucket->scope("userData");
+        $userColl = $userScope->collection("users");
+        $flightColl = $userScope->collection("flights");
 
-        $this->bucket = $bucket;
-        $this->collection = $collection;
+        $this->bucket = $dataBucket;
+        $this->collection = $mainColl;
+        $this->userColl = $userColl;
+        $this->flightColl = $flightColl;
         $this->db = $cluster;
     }
 }

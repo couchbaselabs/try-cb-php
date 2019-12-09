@@ -18,7 +18,7 @@ class UserController extends CouchbaseController
         ];
         $user = new User($credentials);
         try {
-            $this->collection->insert("user::".$request->user, $user);
+            $this->userColl->insert($request->user, $user);
             return response()->json(["data" => ["token" => $this->buildToken($user)]]);
         } catch (\Couchbase\Exception $ex) {
             return response()->json(["failure" => 'Failed to create user'], 409);
@@ -34,7 +34,7 @@ class UserController extends CouchbaseController
         $user = new User($credentials);
 
         try {
-            $userInfo = $this->collection->get("user::".$user->name);
+            $userInfo = $this->userColl->get($user->name);
         } catch (Couchbase\KeyNotFoundException $e) {
             throw new AuthenticationException("User not found");
         }
@@ -57,9 +57,9 @@ class UserController extends CouchbaseController
 
     public function book(Request $request, $userName)
     {
-        $key = "user::" . $userName;
+        $key = $userName;
         try {
-            $userInfo = $this->collection->get($key);
+            $userInfo = $this->userColl->get($key);
         } catch (Couchbase\KeyNotFoundException $e) {
             throw new AuthenticationException("User not found");
         }
@@ -85,10 +85,12 @@ class UserController extends CouchbaseController
         $added = [];
         foreach ($request->json()->get('flights') as $flight) {
             $flight['bookedon'] = 'try-cb-php';
-            $userInfo->flights[] = $flight;
+            $uuid = uniqid();
+            $userInfo->flights[] = $uuid;
+            $this->flightColl->upsert($uuid, $flight);
             $added[] = $flight;
         }
-        $this->collection->upsert($key, $userInfo);
+        $this->userColl->upsert($key, $userInfo);
         return response()->json([
             "data" => ["added" => $added],
             'context' => "Booked flight in Couchbase document $key"
@@ -97,11 +99,15 @@ class UserController extends CouchbaseController
 
     public function booked(Request $request, $userName)
     {
-        $userInfo = $this->collection->get("user::" . $userName);
+        $userInfo = $this->userColl->get($userName);
         $userInfo = json_decode($userInfo->content());
         $flights = [];
         if (property_exists($userInfo, "flights")) {
-            $flights = $userInfo->flights;
+            foreach ($userInfo->flights as $flight) {
+                $flightData = $this->flightColl->get($flight);
+                $flightData = json_decode($flightData->content());
+                array_push($flights, $flightData);
+            }
         }
         return response()->json(["data" => $flights]);
     }
