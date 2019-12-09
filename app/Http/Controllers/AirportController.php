@@ -27,6 +27,8 @@ class AirportController extends CouchbaseController
 
         $result = $this->db->query($query, $options);
         
-        return response()->json(["data" =>  $result->rows()]);
+        return response()->json(["data" =>  $result->rows(),
+                                 "context" => [$query]
+                                ]);
     }
 }
