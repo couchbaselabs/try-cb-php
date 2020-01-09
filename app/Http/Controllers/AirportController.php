@@ -11,11 +11,12 @@ class AirportController extends CouchbaseController
     {
         $searchStr = $request->search;
         $options = new \Couchbase\QueryOptions();
-        if (strlen($searchStr) == 3) {
+        $sameCase = ctype_upper($searchStr) || ctype_lower($searchStr);
+        if ($sameCase && strlen($searchStr) == 3) {
             $options->namedParameters(['faa' => $searchStr]);
             $query = 'SELECT airportname FROM `travel-sample` WHERE faa like $faa limit 5';
         }
-        else if (strlen($searchStr) == 4 && ctype_upper($searchStr)) {
+        else if ($sameCase && strlen($searchStr) == 4) {
             $options->namedParameters(['icao' => $searchStr]);
             $query = 'SELECT airportname FROM `travel-sample` WHERE faa like $icao limit 5';
         } else if (strlen($searchStr) > 0) {
