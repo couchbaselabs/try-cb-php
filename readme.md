@@ -6,6 +6,13 @@ Default sample configuration assumes that `travel-sample` bucket created on the 
 http://localhost:8091. Also the cluster should have Full Text Search capability, and FTS index named `hotels`
 bound to this sample bucket.
 
+Collections can be set up using the `create-collections.sh` script included in this repository, with the following syntax:
+```bash
+$ sh create-collections.sh [ClusterUser] [ClusterPassword] [ClusterHost]
+# Example:
+$ sh create-collections.sh Administrator password localhost
+```
+
 See the main documentation at http://developer.couchbase.com in the developer section for more information.
 
 ## Running the Application
