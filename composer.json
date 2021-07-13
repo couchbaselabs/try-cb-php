@@ -1,15 +1,18 @@
 {
     "name": "laravel/laravel",
     "description": "The Laravel Framework.",
-    "keywords": ["framework", "laravel"],
+    "keywords": [
+        "framework",
+        "laravel"
+    ],
     "license": "MIT",
     "type": "project",
     "require": {
-        "php": ">=5.6.4",
-        "laravel/framework": "5.5.*",
-        "tymon/jwt-auth": "0.5.*",
-        "ytake/laravel-couchbase": "1.0.1",
-        "ext-couchbase": "3.0.0alpha4"
+        "php": ">=7.3",
+        "ext-couchbase": "^3.1.2",
+        "fruitcake/laravel-cors": "^2.0",
+        "laravel/framework": "^8.0",
+        "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
@@ -20,8 +23,8 @@
     },
     "repositories": [
         {
-            "type": "git",
-            "url": "https://github.com/avsej/laravel-couchbase"
+            "type": "composer",
+            "url": "https://repo.packagist.org"
         }
     ],
     "autoload": {

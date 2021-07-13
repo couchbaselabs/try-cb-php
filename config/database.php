@@ -49,9 +49,10 @@ return [
 
         'couchbase' => [
             'driver'        => 'couchbase',
-            'host'          => 'couchbase://' . env('COUCHBASE_SERVER', '127.0.0.1'),
-            'user'          => env('COUCHBASE_USER', 'Administrator'),
-            'password'      => env('COUCHBASE_PASS', 'password'),
+            'host'          => 'couchbase://' . env('CB_HOST', 'db'),
+            'user'          => env('CB_USER', 'Administrator'),
+            'password'      => env('CB_PSWD', 'password'),
+            'bucket'      => env('BUCKET', 'travel-sample'),
         ],
 
         'sqlite' => [
