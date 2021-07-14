@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Credentials;
 use Couchbase\KeyExistsException;
 use Couchbase\DocumentNotFoundException;
+use Couchbase\MutateUpsertSpec;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
+use App\Credentials;
 use App\User;
-use Illuminate\Auth\AuthenticationException;
 
 
 class TenantUserController extends CouchbaseController
@@ -78,61 +78,87 @@ class TenantUserController extends CouchbaseController
         return response()->json(["data" => ["token" => $token], "context" => $queryType]);
     }
 
-    public function book(Request $request, $userName)
+    public function book(Request $request)
     {
-        $key = $userName;
+        $username = $request->user;
+        $agent = $request->tenant;
         try {
-            $userInfo = $this->userColl->get($key);
-        } catch (Couchbase\KeyNotFoundException $e) {
-            throw new AuthenticationException("User not found");
+            $scope = $this->bucket->scope($agent);
+            $usersCollection = $scope->collection("users");
+            $getResult = $usersCollection->get($username);
+        } catch (DocumentNotFoundException $e) {
+            return response()->json(["message" => 'User not found'], 401);
         }
 
-        $userInfo = json_decode($userInfo->content());
-
+        $userInfo = $getResult->content();
         $credentials = [
-            'name' => $userName,
-            'password' => $userInfo->password,
+            'user' => $username,
+            'password' => $userInfo["password"],
         ];
         $user = new User($credentials);
 
         $token = $this->buildToken($user);
         if ($request->token != "") {
             if (strcmp($request->token, $token) != 0) {
-                throw new AuthenticationException("Invalid JWT");
+                return response()->json(["message" => 'Invalid JWT token'], 401);
             }
         }
 
-        if (!property_exists($userInfo, "flights")) {
-            $userInfo->flights = array();
+        if (!array_key_exists("bookings", $userInfo)) {
+            $userInfo["bookings"] = array();
         }
         $added = [];
+        $bookingsCollection = $scope->collection("bookings");
         foreach ($request->json()->get('flights') as $flight) {
             $flight['bookedon'] = 'try-cb-php';
             $uuid = uniqid();
-            $userInfo->flights[] = $uuid;
-            $this->flightColl->upsert($uuid, $flight);
+            $userInfo["bookings"][] = $uuid;
+            $bookingsCollection->upsert($uuid, $flight);
             $added[] = $flight;
         }
-        $this->userColl->upsert($key, $userInfo);
+
+        $usersCollection->mutateIn($username, [
+            new MutateUpsertSpec('bookings', $userInfo["bookings"])
+        ]);
+
+        $queryType = sprintf(
+            "KV update - scoped to %s.users: for password field in document %s",
+            $scope->name(),
+            $request->user
+        );
         return response()->json([
             "data" => ["added" => $added],
-            'context' => "Booked flight in Couchbase document $key"
+            "context" => [$queryType]
         ]);
     }
 
-    public function booked(Request $request, $userName)
+    public function booked(Request $request)
     {
-        $userInfo = $this->userColl->get($userName);
-        $userInfo = json_decode($userInfo->content());
+        $username = $request->user;
+        $agent = $request->tenant;
+
+        $scope = $this->bucket->scope($agent);
+        $usersCollection = $scope->collection("users");
+        $bookingsCollection = $scope->collection("bookings");
+
+        $getResult = $usersCollection->get($username);
+        $userInfo = $getResult->content();
         $flights = [];
-        if (property_exists($userInfo, "flights")) {
-            foreach ($userInfo->flights as $flight) {
-                $flightData = $this->flightColl->get($flight);
-                $flightData = json_decode($flightData->content());
+        if (array_key_exists("bookings", $userInfo)) {
+            foreach ($userInfo["bookings"] as $flight) {
+                $getFlightResult = $bookingsCollection->get($flight);
+                $flightData = $getFlightResult->content();
                 array_push($flights, $flightData);
             }
         }
-        return response()->json(["data" => $flights]);
+
+        $queryType = sprintf(
+            "KV get - scoped to %s.users: for %d bookings in document %s",
+            $scope->name(),
+            count($flights),
+            $request->user
+        );
+        return response()->json(["data" => $flights, "context" => $queryType]);
     }
 
     private function buildToken($user)

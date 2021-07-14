@@ -21,9 +21,9 @@ Route::post('/tenants/{tenant}/user/signup', [TenantUserController::class, 'crea
 
 Route::post('/tenants/{tenant}/user/login', [TenantUserController::class, 'authenticate'])->middleware('api');
 
-Route::post('/tenants/{tenant}/user/{user_name}/flights', [TenantUserController::class, 'book'])->middleware('api');
+Route::put('/tenants/{tenant}/user/{user}/flights', [TenantUserController::class, 'book'])->middleware('api');
 
-Route::get('/tenants/{tenant}/user/{user_name}/flights', [TenantUserController::class, 'booked'])->middleware('api');
+Route::get('/tenants/{tenant}/user/{user}/flights', [TenantUserController::class, 'booked'])->middleware('api');
 
 Route::get('/airports', [AirportController::class, 'search'])->middleware('api');
 
