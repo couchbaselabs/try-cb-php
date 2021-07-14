@@ -17,7 +17,7 @@ use App\User;
 */
 
 
-Route::post('/user/signup', 'UserController@create')->middleware('api');
+Route::post('/tenants/{tenant}/user/signup', 'TenantUserController@create')->middleware('api');
 
 Route::post('/user/login', 'UserController@authenticate')->middleware('api');
 
