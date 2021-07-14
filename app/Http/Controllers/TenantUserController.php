@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Credentials;
 use Couchbase\KeyExistsException;
+use Couchbase\DocumentNotFoundException;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use App\User;
@@ -42,31 +44,38 @@ class TenantUserController extends CouchbaseController
     public function authenticate(Request $request)
     {
         $credentials = [
-            'name' => $request->user,
+            'user' => $request->user,
             'password' => $request->password,
         ];
         $user = new User($credentials);
+        $agent = $request->tenant;
 
         try {
-            $userInfo = $this->userColl->get($user->name);
-        } catch (Couchbase\KeyNotFoundException $e) {
-            throw new AuthenticationException("User not found");
+            $scope = $this->bucket->scope($agent);
+            $usersCollection = $scope->collection("users");
+            $getResult = $usersCollection->get($user->user);
+        } catch (DocumentNotFoundException $e) {
+            return response()->json(["message" => 'User not found'], 401);
         }
 
-        $userInfo = json_decode($userInfo->content());
-
-        if (strcmp($user->password, $userInfo->password) != 0) {
-            throw new AuthenticationException("Invalid password");
+        $userInfo = $getResult->content();
+        if (strcmp($user->password, $userInfo["password"]) != 0) {
+            return response()->json(["message" => 'Invalid password'], 401);
         }
 
         $token = $this->buildToken($user);
         if ($request->token != "") {
             if (strcmp($request->token, $token) != 0) {
-                throw new AuthenticationException("Invalid JWT");
+                return response()->json(["message" => 'Invalid JWT token'], 401);
             }
         }
 
-        return response()->json(["data" => ["token" => $token]]);
+        $queryType = sprintf(
+            "KV get - scoped to %s.users: for password field in document %s",
+            $scope->name(),
+            $request->user
+        );
+        return response()->json(["data" => ["token" => $token], "context" => $queryType]);
     }
 
     public function book(Request $request, $userName)
