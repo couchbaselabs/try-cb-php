@@ -2,25 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use Couchbase\LookupGetSpec;
+use Couchbase\MatchSearchQuery;
+use Couchbase\TermSearchQuery;
+use Couchbase\ConjunctionSearchQuery;
+use Couchbase\DisjunctionSearchQuery;
+use Couchbase\SearchOptions;
 use Illuminate\Http\Request;
-use  \Couchbase\SearchQuery as SearchQuery;
 
 
 class HotelController extends CouchbaseController
 {
     public function find(Request $request)
     {
-        return response()->json(["data" => $this->findHotels()]);
+        return response()->json($this->findHotels());
     }
 
     public function findByDescription(Request $request, $description)
     {
-        return response()->json(["data" => $this->findHotels($description)]);
+        return response()->json($this->findHotels($description));
     }
 
     public function findByDescriptionLocation(Request $request, $description, $location)
     {
-        return response()->json(["data" => $this->findHotels($description, $location)]);
+        return response()->json($this->findHotels($description, $location));
     }
 
     /**
@@ -34,44 +39,45 @@ class HotelController extends CouchbaseController
      *
      * @return array list of the arrays, with 'address', 'name' and 'description' fields filled in
      */
-    protected function findHotels($description = "", $location = "") {
-
-        $queryBody = [SearchQuery::term("hotel")->field("type"),];
+    protected function findHotels($description = "", $location = "")
+    {
+        $queryBody = [(new TermSearchQuery("hotel"))->field("type")];
 
         if (!empty($location) && $location != "*") {
-            $qLoc = SearchQuery::disjuncts(
-                SearchQuery::match($location)->field("country"),
-                SearchQuery::match($location)->field("city"),
-                SearchQuery::match($location)->field("state"),
-                SearchQuery::match($location)->field("address")
-            );
+            $qLoc = new DisjunctionSearchQuery([
+                (new MatchSearchQuery($location))->field("country"),
+                (new MatchSearchQuery($location))->field("city"),
+                (new MatchSearchQuery($location))->field("state"),
+                (new MatchSearchQuery($location))->field("address")
+            ]);
             array_push($queryBody, $qLoc);
         }
 
         if (!empty($description) && $description != "*") {
-            $qDesc = SearchQuery::disjuncts(
-                SearchQuery::match($description)->field("description"),
-                SearchQuery::match($description)->field("name")
-            );
+            $qDesc = new DisjunctionSearchQuery([
+                (new MatchSearchQuery($description))->field("description"),
+                (new MatchSearchQuery($description))->field("name")
+            ]);
             array_push($queryBody, $qDesc);
         }
 
-        $query = new SearchQuery('hotels',SearchQuery::conjuncts(...$queryBody));
-        $query->limit(100);
-
-        // This causes a seg-fault if the index doesn't exist. TODO: Check exists first
-        $result = $this->db->searchQuery('hotels',$query);
+        $opts = new SearchOptions();
+        $opts->limit(100);
+        $conjunctionQuery = new ConjunctionSearchQuery($queryBody);
+        $result = $this->cluster->searchQuery('hotels-index', $conjunctionQuery, $opts);
 
         $response = array();
-        foreach($result->hits() as $hit) {
-            // var_dump($hit);
-            $result = $this->collection->lookupIn($hit["id"], [
-                new \Couchbase\LookupGetSpec("country"),
-                new \Couchbase\LookupGetSpec("city"),
-                new \Couchbase\LookupGetSpec("state"),
-                new \Couchbase\LookupGetSpec("address"),
-                new \Couchbase\LookupGetSpec("name"),
-                new \Couchbase\LookupGetSpec("description")
+        $scope = $this->bucket->scope("inventory");
+        $collection = $scope->collection("hotel");
+        $lookupFields = ["country", "city", "state", "address", "name", "description"];
+        foreach ($result->rows() as $row) {
+            $result = $collection->lookupIn($row["id"], [
+                new LookupGetSpec($lookupFields[0]),
+                new LookupGetSpec($lookupFields[1]),
+                new LookupGetSpec($lookupFields[2]),
+                new LookupGetSpec($lookupFields[3]),
+                new LookupGetSpec($lookupFields[4]),
+                new LookupGetSpec($lookupFields[5])
             ]);
 
             $response[] = [
@@ -86,7 +92,12 @@ class HotelController extends CouchbaseController
             ];
         }
 
-        return $response;
+        $context = [sprintf(
+            "FTS search - scoped to: %s.hotel within fields %s",
+            $scope->name(),
+            implode(" ", $lookupFields)
+        )];
+        return ["data" => $response, "context" => $context];
     }
 
 }
