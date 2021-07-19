@@ -106,7 +106,7 @@ Windows
 extension=couchbase.dll
 ```
 
-Lastly, follow the instructions here to setup the [Composer] PHP dependency management tool.
+Lastly, setup the [Composer] PHP dependency management tool to ensure you can install the project dependencies.
 
 Now we can install the project dependencies:
 
