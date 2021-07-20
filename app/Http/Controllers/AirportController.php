@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use Illuminate\Http\Request;
 
 
@@ -12,24 +13,27 @@ class AirportController extends CouchbaseController
         $searchStr = $request->search;
         $options = new \Couchbase\QueryOptions();
         $sameCase = ctype_upper($searchStr) || ctype_lower($searchStr);
+        $queryPrep = 'SELECT airportname FROM `travel-sample`.inventory.airport WHERE ';
         if ($sameCase && strlen($searchStr) == 3) {
-            $options->namedParameters(['faa' => $searchStr]);
-            $query = 'SELECT airportname FROM `travel-sample` WHERE faa like $faa limit 5';
-        }
-        else if ($sameCase && strlen($searchStr) == 4) {
-            $options->namedParameters(['icao' => $searchStr]);
-            $query = 'SELECT airportname FROM `travel-sample` WHERE faa like $icao limit 5';
-        } else if (strlen($searchStr) > 0) {
-            $options->namedParameters(['airportname' => $searchStr.'%']);
-            $query = 'SELECT airportname FROM `travel-sample` WHERE airportname like $airportname limit 5';
+            // FAA code
+            $options->namedParameters(['faa' => strtoupper($searchStr)]);
+            $query = $queryPrep . 'faa=$faa';
+        } else if ($sameCase && strlen($searchStr) == 4) {
+            // ICAO code
+            $options->namedParameters(['icao' => strtoupper($searchStr)]);
+            $query = $queryPrep . 'icao=$icao';
         } else {
-            $query = "SELECT airportname FROM `travel-sample` limit 5";
+            // Airport name
+            $options->namedParameters(['airportname' => strtolower($searchStr)]);
+            $query = $queryPrep . 'POSITION(LOWER(airportname), $airportname) = 0';
         }
 
-        $result = $this->db->query($query, $options);
-        
-        return response()->json(["data" =>  $result->rows(),
-                                 "context" => [$query]
-                                ]);
+        $result = $this->cluster->query($query, $options);
+
+        $queryType = "N1QL query - scoped to inventory: ";
+        return response()->json([
+            "data" => $result->rows(),
+            "context" => [$queryType, $query]
+        ]);
     }
 }

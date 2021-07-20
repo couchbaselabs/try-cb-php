@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Support\Facades\DB;
-
+use Couchbase\Cluster;
+use Couchbase\ClusterOptions;
 
 class CouchbaseController extends Controller
 {
-    protected $db;
+    protected $cluster;
+
     /**
      * Create a new couchbase controller instance.
      *
@@ -15,20 +16,16 @@ class CouchbaseController extends Controller
      */
     public function __construct()
     {
-        $connectionString = "couchbase://localhost";
-        $cluster = new \Couchbase\Cluster($connectionString);
-        $cluster->authenticateAs("Administrator", "password");
-        $dataBucket = $cluster->bucket("travel-sample");
-        $userBucket = $cluster->bucket("travel-users");
-        $mainColl = $dataBucket->defaultCollection();
-        $userScope = $userBucket->scope("userData");
-        $userColl = $userScope->collection("users");
-        $flightColl = $userScope->collection("flights");
+        $connectionString = config('database.connections.couchbase.host');
+        $opts = new ClusterOptions();
+        $opts->credentials(
+            config('database.connections.couchbase.user'),
+            config('database.connections.couchbase.password')
+        );
+        $cluster = new Cluster($connectionString, $opts);
+        $dataBucket = $cluster->bucket(config("database.connections.couchbase.bucket"));
 
         $this->bucket = $dataBucket;
-        $this->collection = $mainColl;
-        $this->userColl = $userColl;
-        $this->flightColl = $flightColl;
-        $this->db = $cluster;
+        $this->cluster = $cluster;
     }
 }
