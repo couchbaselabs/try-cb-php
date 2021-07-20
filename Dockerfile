@@ -10,7 +10,7 @@ ADD . /app
 RUN apt-get update -y && apt-get install -y \
     software-properties-common \
     git-all \
-    gnupg2 wget vim \
+    gnupg2 wget \
     libzip-dev zip \
     jq curl \
     && docker-php-ext-install zip
