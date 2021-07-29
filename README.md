@@ -21,7 +21,7 @@ We recommend running the application with Docker, which starts up all components
 ## Running the application with Docker
 
 You will need [Docker](https://docs.docker.com/get-docker/) installed on your machine in order to run this application as we have defined 
-a [_Dockerfile_](Dockerfile) and a [_docker-compose.yml_](docker-compose.yml) to run Couchbase Server 7.0.0 beta, 
+a [_Dockerfile_](Dockerfile) and a [_docker-compose.yml_](docker-compose.yml) to run Couchbase Server 7.0.0, 
 the frontend [Vue app](https://github.com/couchbaselabs/try-cb-frontend-v2.git) and the PHP REST API.
 
 To launch the full application you can simply run this command from a terminal:
@@ -30,9 +30,11 @@ To launch the full application you can simply run this command from a terminal:
 docker-compose up
 ```
 
-> **_NOTE:_** When you run the application for the first time, it will pull/build the relevant docker images, so it might take a bit of time.
+> **_NOTE:_** You may need more than the default RAM to run the images.
+We have tested the travel-sample apps with 4.5 GB RAM configured in Docker's Preferences... -> Resources -> Memory.
+When you run the application for the first time, it will pull/build the relevant docker images, so it might take a bit of time.
 
-This will start the PHP backend, Couchbase Server 7.0.0-beta and the Vue frontend app.
+This will start the PHP backend, Couchbase Server 7.0.0 and the Vue frontend app.
 
 You can access the backend API on `http://localhost:8080/`, the UI on `http://localhost:8081/` and Couchbase Server at `http://localhost:8091/`.
 
@@ -47,7 +49,7 @@ Instead of running all services, you can start any combination of `backend`,`fro
 As the provided `docker-compose.yml` sets up dependencies between the services, to make startup as smooth and automatic as possible, we also provide an alternative `mix-and-match.yml`.  We'll look at a few useful scenarios here.
 
 ### Bring your own database
-If you wish to run this application against your own configuration of Couchbase Server, you will need version 7.0.0 beta or later with the `travel-sample` bucket setup.
+If you wish to run this application against your own configuration of Couchbase Server, you will need version 7.0.0 or later with the `travel-sample` bucket setup.
 
 > **_NOTE:_** If you are not using Docker to start up the Database, or the provided wrapper wait-for-couchbase.sh, you will need to create a full text search index on travel-sample bucket called 'hotels-index'. You can do this via the following command:
 
