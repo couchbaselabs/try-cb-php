@@ -147,6 +147,20 @@ docker-compose -f mix-and-match.yml up frontend
 To run the frontend components manually without Docker, follow the guide
 [here](https://github.com/couchbaselabs/try-cb-frontend-v2)
 
+## Running the tests.
+
+All the travel-sample apps conform to the same interface, which means that they can all be used with the same database configuration and Vue.js frontend.
+
+To ensure that every app conforms to the API, we have a [test suite][try-cb-test], which you can simply run with the command:
+
+```
+docker-compose --profile test up test
+```
+
+If you are running locally though, with a view to extending or modifying the travel-sample app, you will likely want to be able to make changes to both the code and the tests in parallel.
+
+ * Start the backend server locally, for example using "Running the backend manually" above.
+ * Check out the [test suite][try-cb-test] repo in a separate working directory, and run the tests manually, as per the instructions.
 
 [Couchbase Server]: https://www.couchbase.com/
 [PHP SDK]: https://docs.couchbase.com/php-sdk/current/hello-world/overview.html
@@ -156,3 +170,4 @@ To run the frontend components manually without Docker, follow the guide
 [Bootstrap]: https://getbootstrap.com/
 [libcouchbase]: https://docs.couchbase.com/c-sdk/current/hello-world/start-using-sdk.html
 [Composer]: https://getcomposer.org/doc/00-intro.md#installation-linux-unix-macos
+[try-cb-test]: https://github.com/couchbaselabs/try-cb-test/

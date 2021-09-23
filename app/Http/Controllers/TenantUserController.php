@@ -75,7 +75,7 @@ class TenantUserController extends CouchbaseController
             $scope->name(),
             $request->user
         );
-        return response()->json(["data" => ["token" => $token], "context" => $queryType]);
+        return response()->json(["data" => ["token" => $token], "context" => [$queryType]]);
     }
 
     public function book(Request $request)
@@ -158,7 +158,7 @@ class TenantUserController extends CouchbaseController
             count($flights),
             $request->user
         );
-        return response()->json(["data" => $flights, "context" => $queryType]);
+        return response()->json(["data" => $flights, "context" => [$queryType]]);
     }
 
     private function buildToken($user)
