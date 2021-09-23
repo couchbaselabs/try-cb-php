@@ -113,7 +113,7 @@ Lastly, setup the [Composer] PHP dependency management tool to ensure you can in
 Now we can install the project dependencies:
 
 ```
-composer install
+composer --ignore-platform-reqs install
 ```
 
 The first time you run against a new database image, you may want to use the provided
